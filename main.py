@@ -12,3 +12,7 @@ if button:
     ex=st.expander('ex')
     ex.write("A")
     ex.image('https://github.com/soramoyou04/streamlit/blob/master/moti.jpg?raw=true', use_column_width=True)
+
+    with col1:
+      st.header("A")
+      st.image('https://github.com/soramoyou04/streamlit/blob/master/moti.jpg?raw=true', use_column_width=True)
