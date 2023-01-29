@@ -16,3 +16,14 @@ if button:
     with col1:
       st.header("A")
       st.image('https://github.com/soramoyou04/streamlit/blob/master/moti.jpg?raw=true', use_column_width=True)
+
+    with col2:
+      st.header("B")
+      st.image('https://github.com/soramoyou04/streamlit/blob/master/moti.jpg?raw=true', use_column_width=True)
+
+button=st.button('とじる')
+"""
+# もちかわいい
+## もち可愛い
+### もちすごい可愛いよね？
+"""
