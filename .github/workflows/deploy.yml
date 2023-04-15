@@ -13,33 +13,32 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Setup SSH keys
+      run: |
+        echo '${{ secrets.REMOTE_SSH_KEY }}' > /dev/shm/remote_ssh_key
+        chmod 600 /dev/shm/remote_ssh_key
+        echo '${{ secrets.VPN_REMOTE_SSH_KEY }}' > /dev/shm/vpn_ssh_key
+        chmod 600 /dev/shm/vpn_ssh_key
+
     - name: Deploy to server
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.REMOTE_HOST }}
-        username: ${{ secrets.REMOTE_USER }}
-        key: ${{ secrets.REMOTE_SSH_KEY }}
-        script: |
-          # WireGuardインターフェース名（例: wg0）
-          WG_INTERFACE="wg0"
+      run: |
+        # WireGuardインターフェース名（例: wg0）
+        WG_INTERFACE="wg0"
 
-          # VPN経由でアクセス可能なディレクトリ
-          TARGET_DIR="/Public/happyworld/streamlit/"
+        # VPN経由でアクセス可能なディレクトリ
+        TARGET_DIR="/Public/happyworld/streamlit/"
 
-          # VPN接続された端末のIPアドレス
-          VPN_TARGET_IP="10.0.0.2"
+        # VPN接続された端末のIPアドレス
+        VPN_TARGET_IP="10.0.0.2"
 
-          # SSHキーを一時ファイルに保存
-          echo "${{ secrets.REMOTE_SSH_KEY }}" > /dev/shm/ssh_key
-          chmod 600 /dev/shm/ssh_key
+        # リモートサーバーにリポジトリを一時的にコピー
+        REMOTE_TEMP_DIR="/tmp/your-repo"
+        rsync -avz --delete $GITHUB_WORKSPACE/ $REMOTE_TEMP_DIR/
 
-          # リモートサーバーにリポジトリを一時的にコピー
-          REMOTE_TEMP_DIR="/tmp/your-repo"
-          rsync -avz --delete $GITHUB_WORKSPACE/ $REMOTE_TEMP_DIR/
+        # リポジトリをVPN接続された端末のディレクトリにコピー
+        rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no -i /dev/shm/remote_ssh_key -o 'ProxyJump ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:22 -i /dev/shm/vpn_ssh_key'" $REMOTE_TEMP_DIR/ ${{ secrets.VPN_REMOTE_USER }}@$VPN_TARGET_IP:$TARGET_DIR/
 
-          # リポジトリをVPN接続された端末のディレクトリにコピー
-          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no -i /dev/shm/ssh_key -o 'ProxyJump ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}'" $REMOTE_TEMP_DIR/ ${{ secrets.VPN_REMOTE_USER }}@$VPN_TARGET_IP:$TARGET_DIR/
-
-          # 一時ファイルと一時ディレクトリを削除
-          rm -f /dev/shm/ssh_key
-          rm -rf $REMOTE_TEMP_DIR
+        # 一時ファイルと一時ディレクトリを削除
+        rm -f /dev/shm/remote_ssh_key
+        rm -f /dev/shm/vpn_ssh_key
+        rm -rf $REMOTE_TEMP_DIR
