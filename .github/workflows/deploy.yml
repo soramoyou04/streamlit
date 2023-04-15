@@ -24,17 +24,22 @@ jobs:
           WG_INTERFACE="wg0"
 
           # VPN経由でアクセス可能なディレクトリ
-          TARGET_DIR="/Public/happyworld/streamlit"
+          TARGET_DIR="/Public/happyworld/streamlit/"
 
           # VPN接続された端末のIPアドレス
           VPN_TARGET_IP="10.0.0.2"
+
+          # SSHキーを一時ファイルに保存
+          echo "${{ secrets.REMOTE_SSH_KEY }}" > /dev/shm/ssh_key
+          chmod 600 /dev/shm/ssh_key
 
           # リモートサーバーにリポジトリを一時的にコピー
           REMOTE_TEMP_DIR="/tmp/your-repo"
           rsync -avz --delete $GITHUB_WORKSPACE/ $REMOTE_TEMP_DIR/
 
           # リポジトリをVPN接続された端末のディレクトリにコピー
-          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no -i /path/to/your/private/key -o 'ProxyJump ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}'" $REMOTE_TEMP_DIR/ ${{ secrets.REMOTE_USER }}@$VPN_TARGET_IP:$TARGET_DIR/
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no -i /dev/shm/ssh_key -o 'ProxyJump ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}'" $REMOTE_TEMP_DIR/ ${{ secrets.REMOTE_USER }}@$VPN_TARGET_IP:$TARGET_DIR/
 
-          # 一時ディレクトリを削除
+          # 一時ファイルと一時ディレクトリを削除
+          rm -f /dev/shm/ssh_key
           rm -rf $REMOTE_TEMP_DIR
