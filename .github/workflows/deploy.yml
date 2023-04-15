@@ -1,0 +1,40 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main  # デプロイ対象のブランチ名を指定します。
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Deploy to server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        key: ${{ secrets.REMOTE_SSH_KEY }}
+        script: |
+          # WireGuardインターフェース名（例: wg0）
+          WG_INTERFACE="wg0"
+
+          # VPN経由でアクセス可能なディレクトリ
+          TARGET_DIR="/Public/happyworld/streamlit"
+
+          # VPN接続された端末のIPアドレス
+          VPN_TARGET_IP="10.0.0.2"
+
+          # リモートサーバーにリポジトリを一時的にコピー
+          REMOTE_TEMP_DIR="/tmp/your-repo"
+          rsync -avz --delete $GITHUB_WORKSPACE/ $REMOTE_TEMP_DIR/
+
+          # リポジトリをVPN接続された端末のディレクトリにコピー
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no -i /path/to/your/private/key -o 'ProxyJump ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}'" $REMOTE_TEMP_DIR/ ${{ secrets.REMOTE_USER }}@$VPN_TARGET_IP:$TARGET_DIR/
+
+          # 一時ディレクトリを削除
+          rm -rf $REMOTE_TEMP_DIR
