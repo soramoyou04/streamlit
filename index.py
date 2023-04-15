@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.title('もちaa')
+st.title('もちaavs')
 
 button=st.button('もちの写真')
 
