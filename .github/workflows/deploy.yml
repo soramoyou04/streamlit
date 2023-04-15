@@ -26,7 +26,7 @@ jobs:
         WG_INTERFACE="wg0"
 
         # VPN経由でアクセス可能なディレクトリ
-        TARGET_DIR="Public/happyworld/streamlit"
+        TARGET_DIR="Public/happyworld"
 
         # VPN接続された端末のIPアドレス
         VPN_TARGET_IP="10.0.0.2"
