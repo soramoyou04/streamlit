@@ -36,10 +36,8 @@ jobs:
         rsync -avz --delete $GITHUB_WORKSPACE/ $REMOTE_TEMP_DIR/
 
         # リポジトリをVPN接続された端末のディレクトリにコピー
-        rsync -avz --delete -e "ssh -p 22 -i /dev/shm/remote_ssh_key -o 'ProxyJump ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:22 -i /dev/shm/vpn_ssh_key'" $REMOTE_TEMP_DIR/ ${{ secrets.VPN_REMOTE_USER }}@$VPN_TARGET_IP:$TARGET_DIR/
-        # rsync -avz --delete -e "ssh -p 22 -i /dev/shm/remote_ssh_key" $LOCAL_TEMP_DIR/ ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:$REMOTE_TEMP_DIR/
-        # ssh -p 22 -i /dev/shm/remote_ssh_key ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "rsync -avz --delete -e 'ssh -i /dev/shm/vpn_ssh_key' $REMOTE_TEMP_DIR/ ${{ secrets.VPN_REMOTE_USER }}@$VPN_TARGET_IP:$TARGET_DIR/"
-
+        # rsync -avz --delete -e "ssh -p 22 -i /dev/shm/remote_ssh_key -o 'ProxyJump ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:22 -i /dev/shm/vpn_ssh_key'" $REMOTE_TEMP_DIR/ ${{ secrets.VPN_REMOTE_USER }}@$VPN_TARGET_IP:$TARGET_DIR/
+        rsync -avz --delete -e "ssh -p 22 -i /dev/shm/remote_ssh_key -o 'ProxyJump ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:22 -i /dev/shm/vpn_ssh_key -o StrictHostKeyChecking=no'" $REMOTE_TEMP_DIR/ ${{ secrets.VPN_REMOTE_USER }}@$VPN_TARGET_IP:$TARGET_DIR/
 
         # 一時ファイルと一時ディレクトリを削除
         rm -f /dev/shm/remote_ssh_key
