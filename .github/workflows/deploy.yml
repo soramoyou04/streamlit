@@ -3,7 +3,7 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - main  # デプロイ対象のブランチ名を指定します。
+      - master  # デプロイ対象のブランチ名を指定します。
 
 jobs:
   deploy:
